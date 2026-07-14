@@ -1,0 +1,18 @@
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OMC session data (tool state, not project source)
+.omc/
+
+# Backup and temp files
+bakup/
+temp/
