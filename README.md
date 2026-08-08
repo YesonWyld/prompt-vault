@@ -79,6 +79,7 @@ python -m http.server 8080
 
 ```
 prompt-vault/
+├── index.html                  # 首页入口（语言选择）
 ├── prompt-vault.html           # 主应用文件 · 中文版（~1300 行）
 ├── prompt-vault.en.html        # 主应用文件 · 英文版
 ├── assets/

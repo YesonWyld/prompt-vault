@@ -79,6 +79,7 @@ Exported JSON is compatible across versions; duplicate entries are skipped autom
 
 ```
 prompt-vault/
+├── index.html                  # Landing page (language picker)
 ├── prompt-vault.html            # Main app — Chinese version (~1300 lines)
 ├── prompt-vault.en.html         # Main app — English version
 ├── assets/

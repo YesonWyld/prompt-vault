@@ -6,6 +6,12 @@
 
 ---
 
+## [Unreleased]
+
+### 修复
+
+- 根路径新增 `index.html` 入口页，修复 GitHub Pages 首页误显示 README 的问题
+
 ## [1.4.0] - 2026-08-08
 
 ### 新增
