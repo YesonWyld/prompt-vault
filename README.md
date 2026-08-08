@@ -23,7 +23,9 @@
 
 ## 🚀 快速开始
 
-> 💻 **在线体验**（GitHub Pages）：部署后访问 `https://<你的 GitHub 用户名>.github.io/prompt-vault/`
+> 💻 **在线体验**（GitHub Pages）：<https://YesonWyld.github.io/prompt-vault/>
+>
+> 📦 **源码仓库**：<https://github.com/YesonWyld/prompt-vault>
 
 1. 下载 `prompt-vault.html`
 2. 用浏览器打开即可使用
