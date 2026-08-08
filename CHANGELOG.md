@@ -12,7 +12,7 @@
 
 - MIT 许可证（`LICENSE`），作者 YesonWyld
 - 站点图标（favicon.ico / favicon.png）
-- GitHub Pages 自动部署工作流（`.github/workflows/pages.yml`）
+- GitHub Pages 部署支持（可在 Settings 中开启，或使用 `.github/workflows/pages.yml` 自动部署）
 
 ### 变更
 
