@@ -16,3 +16,6 @@ desktop.ini
 # Backup and temp files
 bakup/
 temp/
+
+# Local notes (not tracked)
+SSH-PUSH-NOTES.md

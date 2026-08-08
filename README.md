@@ -84,7 +84,8 @@ prompt-vault/
 ├── assets/
 │   ├── favicon.ico             # 站点图标
 │   ├── favicon.png
-│   └── screenshot.png          # README 预览截图
+│   ├── screenshot.png          # 中文版预览截图
+│   └── screenshot-en.png       # 英文版预览截图
 ├── .github/workflows/pages.yml # GitHub Pages 自动部署
 ├── README.md
 ├── README.en.md                # 英文说明文档

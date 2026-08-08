@@ -21,7 +21,7 @@ A **zero-dependency, single-file** AI prompt manager. Runs directly in your brow
 
 ## 📸 Screenshot
 
-![PromptVault screenshot](assets/screenshot.png)
+![PromptVault English interface](assets/screenshot-en.png)
 
 ## 🚀 Quick Start
 
@@ -84,7 +84,8 @@ prompt-vault/
 ├── assets/
 │   ├── favicon.ico              # Site icon
 │   ├── favicon.png
-│   └── screenshot.png           # README screenshot
+│   ├── screenshot.png           # Chinese version preview
+│   └── screenshot-en.png        # English version preview
 ├── .github/workflows/pages.yml  # GitHub Pages auto-deploy
 ├── README.md                    # Chinese docs
 ├── README.en.md                 # English docs
