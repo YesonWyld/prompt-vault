@@ -6,6 +6,12 @@
 
 ---
 
+## [Unreleased]
+
+### 新增
+
+- 应用英文版（`prompt-vault.en.html`）与英文说明文档（`README.en.md`）
+
 ## [1.3.0] - 2026-08-08
 
 ### 新增

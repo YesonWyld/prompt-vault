@@ -4,6 +4,8 @@
 
 一个**零依赖、单文件**的 AI 提示词管理工具。在浏览器中直接运行，所有数据存储在 localStorage 中，无需服务器、无需安装。
 
+> 🌐 语言：中文 | [English](README.en.md)
+
 ## ✨ 功能特性
 
 - **📝 提示词管理** — 新建、编辑、删除、查看 AI 提示词，支持名称、正文、备注、工具、标签
@@ -27,7 +29,7 @@
 >
 > 📦 **源码仓库**：<https://github.com/YesonWyld/prompt-vault>
 
-1. 下载 `prompt-vault.html`
+1. 下载 `prompt-vault.html`（中文版）或 `prompt-vault.en.html`（英文版）
 2. 用浏览器打开即可使用
 3. （可选）部署到任意静态文件服务器
 
@@ -77,13 +79,15 @@ python -m http.server 8080
 
 ```
 prompt-vault/
-├── prompt-vault.html           # 主应用文件（~1300 行）
+├── prompt-vault.html           # 主应用文件 · 中文版（~1300 行）
+├── prompt-vault.en.html        # 主应用文件 · 英文版
 ├── assets/
 │   ├── favicon.ico             # 站点图标
 │   ├── favicon.png
 │   └── screenshot.png          # README 预览截图
 ├── .github/workflows/pages.yml # GitHub Pages 自动部署
 ├── README.md
+├── README.en.md                # 英文说明文档
 ├── CHANGELOG.md
 ├── LICENSE
 └── .gitignore

@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PromptVault · AI Prompt Manager</title>
+<link rel="icon" type="image/png" sizes="512x512" href="assets/favicon.png">
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<style>
+  :root {
+    --bg: #F5F5F7;
+    --surface: #FFFFFF;
+    --border: #E5E5EA;
+    --border-hover: #C5C5CC;
+    --text: #1D1D1F;
+    --text-sec: #6E6E73;
+    --text-ter: #AEAEB2;
+    --accent: #007AFF;
+    --accent-light: #E8F0FE;
+    --danger: #FF3B30;
+    --danger-light: #FFF0EF;
+    --success: #34C759;
+    --tag-bg: #F2F2F7;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-lg: 0 8px 30px rgba(0,0,0,0.10);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1A1A1E;
+      --surface: #2C2C2E;
+      --border: #3A3A3C;
+      --border-hover: #545458;
+      --text: #F5F5F7;
+      --text-sec: #ABABAB;
+      --text-ter: #6E6E73;
+      --accent: #0A84FF;
+      --accent-light: rgba(10,132,255,0.15);
+      --danger: #FF453A;
+      --danger-light: rgba(255,69,58,0.15);
+      --success: #30D158;
+      --tag-bg: #3A3A3C;
+      --shadow: 0 1px 3px rgba(0,0,0,0.2);
+      --shadow-lg: 0 8px 30px rgba(0,0,0,0.3);
+    }
+    body { background: var(--bg); }
+    .header { background: rgba(44,44,46,0.85); backdrop-filter: blur(20px); }
+    .search-box input { background: var(--bg); }
+    .btn-outline { background: var(--surface); border-color: var(--border); }
+    .card:hover { border-color: var(--border-hover); }
+    .toast { background: var(--surface); color: var(--text); border: 0.5px solid var(--border); }
+    .form-input, .form-textarea { background: var(--bg); }
+    .form-input.auto-generated { background: rgba(10,132,255,0.08); border-color: rgba(10,132,255,0.3); }
+    .auto-name-hint { color: var(--text-ter); }
+    .tag-input-item { background: var(--accent-light); color: var(--accent); }
+    ::-webkit-scrollbar-thumb { background: var(--border-hover); }
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Helvetica Neue", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: var(--surface);
+    border-bottom: 0.5px solid var(--border);
+    padding: 16px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(20px);
+    background: rgba(255,255,255,0.85);
+  }
+  .header-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .logo {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 16px;
+  }
+  .search-box {
+    flex: 1;
+    min-width: 200px;
+    max-width: 400px;
+    position: relative;
+  }
+  .search-box input {
+    width: 100%;
+    padding: 8px 12px 8px 36px;
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+    transition: border 0.2s;
+  }
+  .search-box input:focus { border-color: var(--accent); background: var(--surface); }
+  .search-box .search-icon {
+    position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+    color: var(--text-ter); font-size: 14px; pointer-events: none;
+  }
+  .header-actions { display: flex; gap: 8px; }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #0066D6; }
+  .btn-outline {
+    background: var(--surface); color: var(--text);
+    border: 0.5px solid var(--border);
+  }
+  .btn-outline:hover { border-color: var(--border-hover); background: var(--bg); }
+  .btn-danger { background: var(--danger-light); color: var(--danger); border: 0.5px solid var(--danger); }
+  .btn-danger:hover { background: var(--danger); color: white; }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+  .btn-icon {
+    width: 32px; height: 32px; padding: 0;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: var(--radius-sm);
+    background: none; border: none; cursor: pointer; color: var(--text-sec);
+    transition: all 0.15s;
+  }
+  .btn-icon:hover { background: var(--tag-bg); color: var(--text); }
+  .btn-icon.danger:hover { background: var(--danger-light); color: var(--danger); }
+
+  /* ── Main Layout ── */
+  .main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+
+  /* ── Drop Zone ── */
+  .drop-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0,122,255,0.08);
+    border: 3px dashed var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 600; color: var(--accent);
+    pointer-events: none; opacity: 0; transition: opacity 0.2s;
+  }
+  .drop-overlay.visible { opacity: 1; pointer-events: auto; }
+
+  /* ── Toolbar ── */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .tag-filter {
+    display: flex; gap: 6px; flex-wrap: wrap; flex: 1;
+  }
+  .tag-chip {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    background: var(--tag-bg);
+    color: var(--text-sec);
+    cursor: pointer;
+    border: 0.5px solid transparent;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .tag-chip:hover { border-color: var(--border-hover); }
+  .tag-chip.active { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
+  .count-badge {
+    font-size: 11px; background: var(--accent); color: white;
+    padding: 0 6px; border-radius: 10px; margin-left: 4px;
+  }
+  .stats { font-size: 13px; color: var(--text-ter); white-space: nowrap; }
+
+  /* ── Card Grid ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 16px;
+  }
+
+  /* ── Card ── */
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.2s;
+    cursor: pointer;
+    position: relative;
+  }
+  .card:hover { box-shadow: var(--shadow-lg); border-color: transparent; transform: translateY(-2px); }
+  .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; }
+  .card-title {
+    font-size: 15px; font-weight: 600; color: var(--text);
+    line-height: 1.4; flex: 1; padding-right: 8px;
+  }
+  .card-menu { position: relative; }
+  .card-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 12px; }
+  .card-tag {
+    font-size: 11px; padding: 2px 8px; border-radius: 4px;
+    background: var(--tag-bg); color: var(--text-sec);
+  }
+  .card-preview {
+    font-size: 13px; color: var(--text-sec); line-height: 1.6;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+    overflow: hidden; margin-bottom: 16px; flex: 1;
+    white-space: pre-wrap;
+  }
+  .card-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 12px; border-top: 0.5px solid var(--border);
+    font-size: 12px; color: var(--text-ter);
+  }
+  .card-actions { display: flex; gap: 4px; }
+
+  /* ── Empty State ── */
+  .empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 64px 24px;
+    color: var(--text-ter);
+  }
+  .empty-state .icon { font-size: 48px; margin-bottom: 16px; opacity: 0.3; }
+  .empty-state p { font-size: 15px; margin-bottom: 4px; }
+  .empty-state .sub { font-size: 13px; }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.3);
+    z-index: 1000; display: flex; align-items: center; justify-content: center;
+    padding: 24px; opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: auto; }
+  .modal {
+    background: var(--surface);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 720px;
+    max-height: 85vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-lg);
+    transform: translateY(20px);
+    transition: transform 0.2s;
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 24px 16px; border-bottom: 0.5px solid var(--border);
+  }
+  .modal-title { font-size: 17px; font-weight: 600; }
+  .modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+  .modal-footer {
+    display: flex; justify-content: flex-end; gap: 8px;
+    padding: 16px 24px; border-top: 0.5px solid var(--border);
+  }
+
+  /* ── Form ── */
+  .form-group { margin-bottom: 18px; }
+  .form-label {
+    display: block; font-size: 13px; font-weight: 500;
+    color: var(--text-sec); margin-bottom: 6px;
+  }
+  .form-input, .form-textarea {
+    width: 100%; padding: 10px 12px;
+    border: 0.5px solid var(--border); border-radius: var(--radius-sm);
+    font-size: 14px; color: var(--text); background: var(--bg);
+    outline: none; transition: border 0.2s; font-family: inherit;
+  }
+  .form-input:focus, .form-textarea:focus { border-color: var(--accent); background: var(--surface); }
+  .form-textarea { resize: vertical; min-height: 180px; line-height: 1.6; }
+  .textarea-counter {
+    font-size: 12px; color: var(--text-ter); text-align: right;
+    margin-top: 4px;
+  }
+  .tag-input-row { display: flex; gap: 6px; align-items: center; }
+  .tag-input-row .form-input { flex: 1; }
+  .tag-add-btn {
+    padding: 8px 14px; border-radius: var(--radius-sm);
+    background: var(--accent-light); color: var(--accent); border: none;
+    font-size: 13px; cursor: pointer; white-space: nowrap;
+    transition: background 0.15s;
+  }
+  .tag-add-btn:hover { background: var(--accent); color: white; }
+  .tag-input-wrap { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+  .tag-input-item {
+    display: flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 4px;
+    background: var(--accent-light); color: var(--accent); font-size: 13px;
+  }
+  .tag-input-item .remove-tag { cursor: pointer; font-size: 14px; opacity: 0.6; }
+  .tag-input-item .remove-tag:hover { opacity: 1; }
+  .form-label .optional { font-size: 12px; color: var(--text-ter); font-weight: 400; }
+  .auto-name-hint { font-size: 12px; color: var(--text-ter); margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+  .form-input.auto-generated { background: #F0F7FF; border-color: #B8D8FF; }
+
+  /* ── Detail View ── */
+  .detail-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.3);
+    z-index: 1000; display: flex; justify-content: flex-end;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s;
+  }
+  .detail-overlay.open { opacity: 1; pointer-events: auto; }
+  .detail-panel {
+    background: var(--surface); width: 100%; max-width: 560px;
+    height: 100%; overflow-y: auto;
+    box-shadow: -4px 0 30px rgba(0,0,0,0.1);
+    transform: translateX(100%); transition: transform 0.25s ease;
+    display: flex; flex-direction: column;
+  }
+  .detail-overlay.open .detail-panel { transform: translateX(0); }
+  .detail-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 24px; border-bottom: 0.5px solid var(--border);
+    position: sticky; top: 0; background: var(--surface); z-index: 1;
+  }
+  .detail-body { padding: 24px; flex: 1; }
+  .detail-prompt {
+    background: var(--bg); border-radius: var(--radius-sm);
+    padding: 16px; font-size: 14px; line-height: 1.7;
+    white-space: pre-wrap; color: var(--text);
+    border: 0.5px solid var(--border);
+    margin-top: 16px;
+  }
+  .detail-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .detail-meta-item {
+    font-size: 12px; color: var(--text-sec);
+    padding: 4px 10px; background: var(--tag-bg); border-radius: 4px;
+  }
+  .detail-actions { display: flex; gap: 8px; padding: 16px 24px; border-top: 0.5px solid var(--border); }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: var(--text); color: white; padding: 10px 20px;
+    border-radius: 20px; font-size: 14px; z-index: 9999;
+    opacity: 0; transition: all 0.3s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ── Responsive ── */
+  @media (max-width: 640px) {
+    .header-inner { flex-direction: column; align-items: stretch; }
+    .search-box { max-width: 100%; }
+    .main { padding: 16px; }
+    .card-grid { grid-template-columns: 1fr; }
+    .modal { max-height: 95vh; border-radius: 16px 16px 0 0; margin-top: auto; }
+    .detail-panel { max-width: 100%; }
+  }
+
+  /* ── Autocomplete Dropdown ── */
+  .autocomplete-wrap { position: relative; }
+  .autocomplete-dropdown {
+    position: absolute; left: 0; right: 0; top: calc(100% + 4px);
+    background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm); box-shadow: var(--shadow-lg);
+    z-index: 9999; max-height: 200px; overflow-y: auto; display: none;
+  }
+  .autocomplete-dropdown.open { display: block; }
+  .ac-item {
+    padding: 8px 12px; font-size: 13px; cursor: pointer;
+    color: var(--text); display: flex; align-items: center; justify-content: space-between;
+    transition: background 0.1s;
+  }
+  .ac-item:hover, .ac-item.focused { background: var(--accent-light); color: var(--accent); }
+  .ac-item .ac-count { font-size: 11px; color: var(--text-ter); }
+  .ac-empty { padding: 10px 12px; font-size: 13px; color: var(--text-ter); }
+
+  /* ── Tool Chip Selector ── */
+  .tool-selector { display: flex; flex-direction: column; gap: 8px; }
+  .tool-chips-row { display: flex; gap: 6px; flex-wrap: wrap; min-height: 28px; }
+  .tool-chip-opt {
+    padding: 4px 12px; border-radius: 20px; font-size: 13px;
+    border: 0.5px solid var(--border); background: var(--surface);
+    cursor: pointer; transition: all 0.15s; color: var(--text-sec);
+    user-select: none;
+  }
+  .tool-chip-opt:hover { border-color: var(--accent); color: var(--accent); }
+  .tool-chip-opt.selected { background: var(--accent); border-color: var(--accent); color: white; }
+  .tool-chip-opt.selected:hover { background: var(--danger); border-color: var(--danger); }
+  .tool-input-row { display: flex; gap: 6px; align-items: center; }
+  .tool-input-row .form-input { flex: 1; }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 3px; }
+  /* ── Footer ── */
+  .app-footer {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-ter);
+    padding: 18px 16px 14px;
+    line-height: 1.7;
+    user-select: none;
+  }
+  .app-footer a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .app-footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<!-- Drop Zone Overlay -->
+<div class="drop-overlay" id="dropOverlay">&#128229; Release to import JSON file</div>
+
+<!-- Header -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">P</div>
+      PromptVault
+    </div>
+    <div class="search-box">
+      <span class="search-icon">&#128269;</span>
+      <input type="text" id="searchInput" placeholder="Search prompts… (Ctrl+K)">
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-outline btn-sm" id="importBtn">&#128229; Import</button>
+      <button class="btn btn-outline btn-sm" id="exportBtn">&#128228; Export</button>
+      <button class="btn btn-primary btn-sm" id="newBtn">&#43; New</button>
+    </div>
+  </div>
+</header>
+
+<!-- Main -->
+<main class="main">
+  <div class="toolbar">
+    <div class="tag-filter" id="tagFilter"></div>
+    <div class="stats" id="statsText"></div>
+  </div>
+  <div class="card-grid" id="cardGrid"></div>
+</main>
+
+<!-- Editor Modal -->
+<div class="modal-overlay" id="editorModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="editorTitle">New Prompt</div>
+      <button class="btn-icon" id="editorCloseBtn">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Name <span class="optional">(auto-generated, editable)</span></label>
+        <input class="form-input" id="formName" placeholder="Auto-generated after pasting the body…" maxlength="100">
+        <div class="auto-name-hint" id="autoNameHint" style="display:none">
+          &#10024; Name auto-generated from the body — you can edit it
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tools <span class="optional">(click to pick an existing tool, or type a new one)</span></label>
+        <div class="tool-selector">
+          <div class="tool-chips-row" id="toolChipsRow"></div>
+          <div class="tag-input-wrap" id="toolWrap"></div>
+          <div class="tool-input-row">
+            <div class="autocomplete-wrap" style="flex:1">
+              <input class="form-input" id="toolInput" placeholder="Type a new tool name and press Enter to add…" autocomplete="off">
+              <div class="autocomplete-dropdown" id="toolDropdown"></div>
+            </div>
+            <button class="tag-add-btn" id="toolAddBtn">+ Add</button>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tags</label>
+        <div class="tool-chips-row" id="tagSuggestRow"></div>
+        <div class="tag-input-wrap" id="tagWrap"></div>
+        <div class="tag-input-row">
+          <div class="autocomplete-wrap" style="flex:1">
+            <input class="form-input" id="tagInput" placeholder="Type a tag name and press Enter or click add…" autocomplete="off">
+            <div class="autocomplete-dropdown" id="tagDropdown"></div>
+          </div>
+          <button class="tag-add-btn" id="tagAddBtn">+ Add</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Prompt Body *</label>
+        <textarea class="form-textarea" id="formBody" placeholder="Paste or write your prompt here…"></textarea>
+        <div class="textarea-counter" id="bodyCounter">0 chars / 0 lines</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes (optional)</label>
+        <textarea class="form-textarea" id="formNote" placeholder="Usage tips, effectiveness notes…" style="min-height:80px"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="editorCancelBtn">Cancel</button>
+      <button class="btn btn-primary" id="editorSaveBtn">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Panel -->
+<div class="detail-overlay" id="detailOverlay">
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-header">
+      <div class="modal-title" id="detailName"></div>
+      <button class="btn-icon" id="detailCloseBtn">&#10005;</button>
+    </div>
+    <div class="detail-body">
+      <div class="detail-meta" id="detailMeta"></div>
+      <div class="detail-prompt" id="detailPrompt"></div>
+      <div id="detailNote" style="margin-top:16px;font-size:13px;color:var(--text-sec);line-height:1.7;white-space:pre-wrap;"></div>
+    </div>
+    <div class="detail-actions">
+      <button class="btn btn-outline btn-sm" id="copyBtn">&#128203; Copy Prompt</button>
+      <button class="btn btn-outline btn-sm" id="editBtn">&#9998; Edit</button>
+      <button class="btn btn-danger btn-sm" id="deleteBtn">&#128465; Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Hidden file input -->
+<input type="file" id="fileInput" accept=".json" style="display:none">
+
+<script>
+// ── Data Layer ──
+const STORAGE_KEY = 'promptvault_data';
+
+function loadData() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch(e) { return []; }
+}
+function saveData(data) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch(e) {
+    if (e.name === 'QuotaExceededError' || e.code === 22) {
+    flashToast('&#9888; Storage full — export and clean up old data');
+    } else {
+    flashToast('&#9888; Failed to save data');
+    }
+  }
+}
+
+let prompts = loadData();
+let editingId = null;
+let currentDetailId = null;
+let activeTag = null;
+
+// ── Toast (module-level timer) ── [#10]
+let _toastTimer = null;
+function flashToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ── Utils ──
+function genId() { return 'pv_' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36); }
+
+// [#1/#13] Full HTML entity escaping (covers &, <, >, ", ')
+function escHtml(s) {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ── Auto-name from body ──
+function autoName() {
+  const body = document.getElementById('formBody').value.trim();
+  const nameInput = document.getElementById('formName');
+  // If body is empty, clear auto-generated name
+  if (!body) {
+    if (nameInput.dataset.auto === '1') { nameInput.value = ''; nameInput.dataset.auto = '0'; }
+    document.getElementById('autoNameHint').style.display = 'none';
+    return;
+  }
+  // If user has manually edited the name (auto set to '0'), don't overwrite
+  if (nameInput.dataset.auto !== '1') return;
+  // Extract first line as name
+  const firstLine = body.split(/\n/)[0].trim();
+  let name = firstLine.length > 50 ? firstLine.slice(0, 50) + '\u2026' : firstLine;
+  if (!name) name = 'Untitled prompt';
+  nameInput.value = name;
+  nameInput.classList.add('auto-generated');
+  document.getElementById('autoNameHint').style.display = 'flex';
+}
+
+// ── Body textarea character counter ── [#12]
+function updateBodyCounter() {
+  const body = document.getElementById('formBody').value;
+  const chars = body.length;
+  const lines = body ? body.split(/\n/).length : 0;
+  document.getElementById('bodyCounter').textContent = chars + ' chars / ' + lines + ' lines';
+}
+
+// ── Tag Management (event delegation, no inline onclick) ── [#1]
+let formTags = [];
+let formTools = [];   // Tools currently being edited (supports multiple values)
+
+// ── Get all unique tools used in prompts ──
+// Default seed tools — always shown even when no prompts use them
+const DEFAULT_TOOLS = ['Claude Code', 'Doubao', 'Codex', 'Workbuddy'];
+
+function getAllTools() {
+  const map = {};
+  // Seed defaults first (count 0 = shown but not highlighted)
+  DEFAULT_TOOLS.forEach(t => { map[t] = map[t] || 0; });
+  prompts.forEach(p => {
+    if (!p.tool) return;
+    p.tool.split(/[,，、]+/).map(t => t.trim()).filter(Boolean).forEach(t => {
+      map[t] = (map[t] || 0) + 1;
+    });
+  });
+  // Sort: used tools (count > 0) first by frequency, then defaults by DEFAULT_TOOLS order
+  return Object.entries(map).sort((a, b) => {
+    if (b[1] !== a[1]) return b[1] - a[1];
+    const ai = DEFAULT_TOOLS.indexOf(a[0]);
+    const bi = DEFAULT_TOOLS.indexOf(b[0]);
+    if (ai >= 0 && bi >= 0) return ai - bi;
+    return 0;
+  });
+}
+
+// ── Render tool chips (quick-select row) ──
+function renderToolChipsRow() {
+  const row = document.getElementById('toolChipsRow');
+  const allTools = getAllTools();
+  if (!allTools.length) { row.innerHTML = ''; return; }
+  row.innerHTML = allTools.map(([t]) =>
+    '<span class="tool-chip-opt' + (formTools.includes(t) ? ' selected' : '') +
+    '" data-tool="' + escHtml(t) + '">' + escHtml(t) + '</span>'
+  ).join('');
+}
+
+function renderToolChips() {
+  const wrap = document.getElementById('toolWrap');
+  wrap.innerHTML = formTools.map((t, i) =>
+    '<span class="tag-input-item">' + escHtml(t) +
+    '<span class="remove-tag" data-idx="' + i + '">&times;</span></span>'
+  ).join('');
+}
+
+function removeFormTool(idx) {
+  formTools.splice(idx, 1);
+  renderToolChips();
+  renderToolChipsRow();
+}
+
+function toggleTool(name) {
+  const idx = formTools.indexOf(name);
+  if (idx >= 0) formTools.splice(idx, 1);
+  else formTools.push(name);
+  renderToolChips();
+  renderToolChipsRow();
+}
+
+function addTool(val) {
+  val = (val || document.getElementById('toolInput').value).trim();
+  if (!val) return;
+  val.split(/[,，、]+/).map(v => v.trim()).filter(Boolean).forEach(v => {
+    if (!formTools.includes(v)) formTools.push(v);
+  });
+  document.getElementById('toolInput').value = '';
+  renderToolChips();
+  renderToolChipsRow();
+  closeDropdown('toolDropdown');
+  document.getElementById('toolInput').focus();
+}
+
+// ── Autocomplete dropdown helpers ──
+function openDropdown(dropId, items, onSelect) {
+  const dd = document.getElementById(dropId);
+  if (!items.length) { dd.classList.remove('open'); return; }
+  dd.innerHTML = items.map(([label, count]) =>
+    '<div class="ac-item" data-val="' + escHtml(label) + '">' +
+    escHtml(label) +
+    (count ? '<span class="ac-count">×' + count + '</span>' : '') +
+    '</div>'
+  ).join('');
+  dd.classList.add('open');
+  // Single click handler (replace each time)
+  dd._onSelect = onSelect;
+}
+
+function closeDropdown(dropId) {
+  const dd = document.getElementById(dropId);
+  if (dd) dd.classList.remove('open');
+}
+
+function filterSuggestions(allItems, query) {
+  const q = query.toLowerCase();
+  if (!q) return allItems;
+  return allItems.filter(([label]) => label.toLowerCase().includes(q));
+}
+
+// Tool autocomplete
+function onToolInput() {
+  const q = document.getElementById('toolInput').value.trim();
+  const all = getAllTools().filter(([t]) => !formTools.includes(t));
+  const filtered = filterSuggestions(all, q);
+  if (!filtered.length) { closeDropdown('toolDropdown'); return; }
+  openDropdown('toolDropdown', filtered, val => { addTool(val); });
+}
+
+// Tag autocomplete (uses suggestions including DEFAULT_TAGS)
+function onTagInput() {
+  const q = document.getElementById('tagInput').value.trim();
+  const all = getAllTagSuggestions().filter(([t]) => !formTags.includes(t));
+  const filtered = filterSuggestions(all, q);
+  if (!filtered.length) { closeDropdown('tagDropdown'); return; }
+  openDropdown('tagDropdown', filtered, val => { addTagByName(val); });
+}
+
+function addTag() {
+  const input = document.getElementById('tagInput');
+  const val = input.value.trim();
+  closeDropdown('tagDropdown');
+  if (!val) return;
+  val.split(/[,，、]+/).map(v => v.trim()).filter(Boolean).forEach(v => {
+    if (!formTags.includes(v)) formTags.push(v);
+  });
+  input.value = '';
+  renderTagChips();
+  renderTagSuggestRow();
+  input.focus();
+}
+
+function addTagByName(name) {
+  if (!formTags.includes(name)) formTags.push(name);
+  document.getElementById('tagInput').value = '';
+  renderTagChips();
+  renderTagSuggestRow();
+  closeDropdown('tagDropdown');
+  document.getElementById('tagInput').focus();
+}
+
+function removeFormTag(idx) {
+  formTags.splice(idx, 1);
+  renderTagChips();
+  renderTagSuggestRow();
+}
+
+function renderTagChips() {
+  const wrap = document.getElementById('tagWrap');
+  wrap.innerHTML = formTags.map((t, i) =>
+    '<span class="tag-input-item">' + escHtml(t) +
+    '<span class="remove-tag" data-idx="' + i + '">&times;</span></span>'
+  ).join('');
+}
+
+// ── Get all unique tags ──
+// Default seed tags — always shown even when no prompts use them
+const DEFAULT_TAGS = ['Solutions', 'Development'];
+
+// Home filter bar: only show tags that actually exist (excluding default seeds)
+function getAllTags() {
+  const map = {};
+  prompts.forEach(p => (p.tags || []).forEach(t => { map[t] = (map[t] || 0) + 1; }));
+  return Object.entries(map).sort((a, b) => b[1] - a[1]);
+}
+
+// Used by the editor dialog: default seeds + existing historical tags
+function getAllTagSuggestions() {
+  const map = {};
+  DEFAULT_TAGS.forEach(t => { map[t] = map[t] || 0; });
+  prompts.forEach(p => (p.tags || []).forEach(t => { map[t] = (map[t] || 0) + 1; }));
+  return Object.entries(map).sort((a, b) => {
+    if (b[1] !== a[1]) return b[1] - a[1];
+    const ai = DEFAULT_TAGS.indexOf(a[0]);
+    const bi = DEFAULT_TAGS.indexOf(b[0]);
+    if (ai >= 0 && bi >= 0) return ai - bi;
+    return 0;
+  });
+}
+
+// Render tag quick-pick chip row (inside the editor dialog, like the tool selector)
+function renderTagSuggestRow() {
+  const row = document.getElementById('tagSuggestRow');
+  if (!row) return;
+  const all = getAllTagSuggestions();
+  if (!all.length) { row.innerHTML = ''; return; }
+  row.innerHTML = all.map(([t]) =>
+    '<span class="tool-chip-opt' + (formTags.includes(t) ? ' selected' : '') +
+    '" data-suggest-tag="' + escHtml(t) + '">' + escHtml(t) + '</span>'
+  ).join('');
+}
+
+function toggleSuggestTag(name) {
+  const idx = formTags.indexOf(name);
+  if (idx >= 0) formTags.splice(idx, 1);
+  else formTags.push(name);
+  renderTagChips();
+  renderTagSuggestRow();
+}
+
+// ── Render Tag Filter (event delegation) ── [#1]
+function renderTagFilter() {
+  const el = document.getElementById('tagFilter');
+  const tags = getAllTags();
+  let html = '<span class="tag-chip ' + (!activeTag ? 'active' : '') + '" data-tag="">All</span>';
+  tags.forEach(([tag, count]) => {
+    html += '<span class="tag-chip ' + (activeTag === tag ? 'active' : '') +
+      '" data-tag="' + escHtml(tag) + '">' + escHtml(tag) +
+      '<span class="count-badge">' + count + '</span></span>';
+  });
+  el.innerHTML = html;
+}
+
+function handleTagFilterClick(e) {
+  const chip = e.target.closest('[data-tag]');
+  if (!chip) return;
+  activeTag = chip.dataset.tag || null;
+  renderTagFilter();
+  renderList();
+}
+
+// ── Render List (event delegation) ── [#1, #6]
+function getFiltered() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  return prompts.filter(p => {
+    const matchesTag = !activeTag || (p.tags || []).includes(activeTag);
+    const matchesSearch = !q ||
+      p.name.toLowerCase().includes(q) ||
+      (p.tool || '').toLowerCase().includes(q) ||
+      (p.tags || []).some(t => t.toLowerCase().includes(q)) ||
+      p.body.toLowerCase().includes(q) ||
+      (p.note || '').toLowerCase().includes(q);
+    return matchesTag && matchesSearch;
+  }).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+}
+
+function renderList() {
+  renderTagFilter();
+  const list = getFiltered();
+  const grid = document.getElementById('cardGrid');
+  const stats = document.getElementById('statsText');
+
+  stats.textContent = prompts.length + ' prompt' + (prompts.length === 1 ? '' : 's') +
+    (activeTag ? ' \xB7 Filtered by "' + activeTag + '"' : '') +
+    (list.length !== prompts.length ? ' \xB7 Showing ' + list.length : '');
+
+  if (list.length === 0) {
+    grid.innerHTML =
+      '<div class="empty-state">' +
+        '<div class="icon">&#128218;</div>' +
+        '<p>' + (prompts.length === 0 ? 'No prompts yet \u2014 click "New" to add one' : 'No matching prompts') + '</p>' +
+        '<p class="sub">' + (prompts.length === 0 ? 'Drag & drop a JSON file to import, or filter by tags and search' : 'Try a different keyword or tag') + '</p>' +
+      '</div>';
+    return;
+  }
+
+  grid.innerHTML = list.map(p => {
+    const preview = (p.body || '').replace(/\n/g, ' ').slice(0, 120);
+    const date = p.createdAt ? new Date(p.createdAt).toLocaleDateString('en-US') : '';
+    const updated = p.updatedAt ? new Date(p.updatedAt).toLocaleDateString('en-US') : '';
+    return '<div class="card" data-id="' + p.id + '">' +
+        '<div class="card-header">' +
+          '<div class="card-title">' + escHtml(p.name) + '</div>' +
+          '<div class="card-actions">' +
+            '<button class="btn-icon danger" data-action="delete" data-id="' + p.id + '" title="Delete">&#128465;</button>' +
+          '</div>' +
+        '</div>' +
+        ((p.tags || []).length ? '<div class="card-tags">' + (p.tags || []).map(t => '<span class="card-tag">' + escHtml(t) + '</span>').join('') + '</div>' : '') +
+        '<div class="card-preview">' + escHtml(preview) + ((p.body || '').length > 120 ? '\u2026' : '') + '</div>' +
+        '<div class="card-footer">' +
+          '<span>' + (p.tool ? escHtml(p.tool) : '') + '</span>' +
+          '<span>' + (updated || date) + '</span>' +
+        '</div>' +
+      '</div>';
+  }).join('');
+}
+
+function handleCardGridClick(e) {
+  // Check delete button first
+  const deleteBtn = e.target.closest('[data-action="delete"]');
+  if (deleteBtn) {
+    e.stopPropagation();
+    const id = deleteBtn.dataset.id;
+    const p = prompts.find(x => x.id === id);
+    if (!p) return;
+    if (!confirm('\u786E\u5B9A\u5220\u9664\u300C' + p.name + '\u300D\uFF1F')) return;
+    prompts = prompts.filter(x => x.id !== id);
+    saveData(prompts);
+    renderList();
+    flashToast('\u5DF2\u5220\u9664');
+    return;
+  }
+  // Otherwise open detail
+  const card = e.target.closest('[data-id]');
+  if (card) openDetail(card.dataset.id);
+}
+
+// ── Editor ──
+function openEditor(id) {
+  editingId = id || null;
+  formTags = [];
+  formTools = [];
+  document.getElementById('editorTitle').textContent = id ? 'Edit Prompt' : 'New Prompt';
+  document.getElementById('formName').value = '';
+  document.getElementById('formName').dataset.auto = '0';
+  document.getElementById('formName').classList.remove('auto-generated');
+  document.getElementById('autoNameHint').style.display = 'none';
+  document.getElementById('toolInput').value = '';
+  document.getElementById('formBody').value = '';
+  document.getElementById('formNote').value = '';
+  updateBodyCounter();
+
+  if (id) {
+    const p = prompts.find(x => x.id === id);
+    if (p) {
+      document.getElementById('formName').value = p.name || '';
+      document.getElementById('formName').dataset.auto = '0';
+// Backward compatibility: tool may be a comma-separated string
+      formTools = p.tool
+        ? p.tool.split(/[,，、]+/).map(t => t.trim()).filter(Boolean)
+        : [];
+      document.getElementById('formBody').value = p.body || '';
+      document.getElementById('formNote').value = p.note || '';
+      formTags = [...(p.tags || [])];
+    }
+  }
+  renderTagChips();
+  renderTagSuggestRow();
+  renderToolChips();
+  renderToolChipsRow();
+  updateBodyCounter();
+  document.getElementById('editorModal').classList.add('open');
+  setTimeout(() => document.getElementById('formBody').focus(), 100);
+}
+
+function closeEditor() {
+  document.getElementById('editorModal').classList.remove('open');
+  editingId = null;
+  closeDropdown('tagDropdown');
+  closeDropdown('toolDropdown');
+}
+
+function savePrompt() {
+  // Auto-capture unsubmitted tag input
+  const pendingTag = document.getElementById('tagInput').value.trim();
+  if (pendingTag && !formTags.includes(pendingTag)) {
+    formTags.push(pendingTag);
+    document.getElementById('tagInput').value = '';
+  }
+  // Auto-capture unsubmitted tool input
+  const pendingTool = document.getElementById('toolInput').value.trim();
+  if (pendingTool && !formTools.includes(pendingTool)) {
+    formTools.push(pendingTool);
+    document.getElementById('toolInput').value = '';
+  }
+
+  let name = document.getElementById('formName').value.trim();
+  const body = document.getElementById('formBody').value.trim();
+    if (!body) { flashToast('Please paste or enter the prompt body'); document.getElementById('formBody').focus(); return; }
+  if (!name) {
+    const firstLine = body.split(/\n/)[0].trim();
+    name = firstLine.length > 50 ? firstLine.slice(0, 50) + '…' : (firstLine || 'Untitled prompt');
+  }
+  const tool = formTools.join('、');
+  const note = document.getElementById('formNote').value.trim();
+
+  if (editingId) {
+    const idx = prompts.findIndex(x => x.id === editingId);
+    if (idx >= 0) {
+      prompts[idx] = { ...prompts[idx], name, tool, tags: [...formTags], body, note, updatedAt: Date.now() };
+    }
+  } else {
+    prompts.unshift({ id: genId(), name, tool, tags: [...formTags], body, note, createdAt: Date.now(), updatedAt: Date.now() });
+  }
+  saveData(prompts);
+  closeEditor();
+  renderList();
+  flashToast(editingId ? 'Prompt updated' : 'Prompt saved');
+}
+
+// ── Detail ──
+function openDetail(id) {
+  const p = prompts.find(x => x.id === id);
+  if (!p) return;
+  currentDetailId = id;
+  document.getElementById('detailName').textContent = p.name || '';
+  const meta = document.getElementById('detailMeta');
+  const parts = [];
+  if (p.tool) parts.push('<span class="detail-meta-item">\uD83E\uDD16 ' + escHtml(p.tool) + '</span>');
+  if (p.tags && p.tags.length) parts.push(...p.tags.map(t => '<span class="detail-meta-item">\uD83C\uDFF7\uFE0F ' + escHtml(t) + '</span>'));
+  if (p.createdAt) parts.push('<span class="detail-meta-item">\uD83D\uDCC5 ' + new Date(p.createdAt).toLocaleString('en-US') + '</span>');
+  meta.innerHTML = parts.join('');
+  document.getElementById('detailPrompt').textContent = p.body || '';
+  document.getElementById('detailNote').textContent = p.note || '';
+  document.getElementById('detailNote').style.display = p.note ? 'block' : 'none';
+  document.getElementById('detailOverlay').classList.add('open');
+}
+
+function closeDetail() {
+  document.getElementById('detailOverlay').classList.remove('open');
+  currentDetailId = null;
+}
+
+function editCurrent() {
+  const id = currentDetailId;
+  closeDetail();
+  setTimeout(() => openEditor(id), 200);
+}
+
+function deleteCurrent() {
+  if (!currentDetailId) return;
+  const p = prompts.find(x => x.id === currentDetailId);
+  if (!p) return;
+  if (!confirm('Delete "' + p.name + '"?')) return;
+  prompts = prompts.filter(x => x.id !== currentDetailId);
+  saveData(prompts);
+  closeDetail();
+  renderList();
+  flashToast('Deleted');
+}
+
+// ── Copy (always sync, uses callback pattern) ── [#3]
+function copyToClipboard(text, onSuccess, onFail) {
+  // Method 1: execCommand (works in file:// and offline)
+  if (document.execCommand) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px;opacity:0';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand('copy');
+      if (onSuccess) onSuccess();
+      return;
+    } catch(e) {
+      // fall through
+    } finally {
+      document.body.removeChild(ta);
+    }
+  }
+  // Method 2: modern Clipboard API (HTTPS only)
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(() => {
+      if (onSuccess) onSuccess();
+    }).catch(() => {
+      if (onFail) onFail();
+    });
+    return;
+  }
+  // Method 3: prompt fallback
+  try {
+    window.prompt('\u6309 Ctrl+C \u590D\u5236:', text);
+    if (onSuccess) onSuccess();
+  } catch(e) {
+    if (onFail) onFail();
+  }
+}
+
+function copyPrompt() {
+  const p = prompts.find(x => x.id === currentDetailId);
+  if (!p) return;
+  copyToClipboard(
+    p.body || '',
+    () => flashToast('\u5DF2\u590D\u5236\u5230\u526A\u8D34\u677F \u2705'),
+    () => flashToast('\u590D\u5236\u5931\u8D25\uFF0C\u8BF7\u624B\u52A8\u590D\u5236')
+  );
+}
+
+// ── Import / Export ──
+function exportJSON() {
+  if (!prompts.length) { flashToast('\u6CA1\u6709\u6570\u636E\u53EF\u5BFC\u51FA'); return; }
+  const blob = new Blob([JSON.stringify(prompts, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'promptvault-' + new Date().toISOString().slice(0, 10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  flashToast('\u5DF2\u5BFC\u51FA ' + prompts.length + ' \u6761\u63D0\u793A\u8BCD');
+}
+
+function importJSON() {
+  document.getElementById('fileInput').click();
+}
+
+function handleImport(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  readFileAsJSON(file);
+  e.target.value = '';
+}
+
+function readFileAsJSON(file) {
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!Array.isArray(data)) throw new Error('\u683C\u5F0F\u9519\u8BEF');
+      const existing = new Set(prompts.map(p => p.id));
+      let added = 0;
+      data.forEach(item => {
+        if (!item.id) item.id = genId();
+        if (!existing.has(item.id)) {
+          item.createdAt = item.createdAt || Date.now();
+          item.updatedAt = item.updatedAt || Date.now();
+          prompts.push(item);
+          existing.add(item.id);
+          added++;
+        }
+      });
+      saveData(prompts);
+      renderList();
+      flashToast('\u6210\u529F\u5BFC\u5165 ' + added + ' \u6761\u63D0\u793A\u8BCD' + (added < data.length ? '\uFF0C\u8DF3\u8FC7 ' + (data.length - added) + ' \u6761\u91CD\u590D' : ''));
+    } catch (err) {
+      flashToast('\u5BFC\u5165\u5931\u8D25\uFF1A\u6587\u4EF6\u683C\u5F0F\u4E0D\u6B63\u786E');
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ── Drag & Drop Import ── [#15]
+function setupDragDrop() {
+  let dragCounter = 0;
+  const overlay = document.getElementById('dropOverlay');
+  document.addEventListener('dragenter', e => {
+    e.preventDefault();
+    if (e.dataTransfer && e.dataTransfer.types.includes('Files')) {
+      dragCounter++;
+      overlay.classList.add('visible');
+    }
+  });
+  document.addEventListener('dragleave', e => {
+    e.preventDefault();
+    dragCounter--;
+    if (dragCounter <= 0) { dragCounter = 0; overlay.classList.remove('visible'); }
+  });
+  document.addEventListener('dragover', e => e.preventDefault());
+  document.addEventListener('drop', e => {
+    e.preventDefault();
+    dragCounter = 0;
+    overlay.classList.remove('visible');
+    const file = e.dataTransfer.files[0];
+    if (file && file.name.endsWith('.json')) {
+      readFileAsJSON(file);
+    } else if (file) {
+      flashToast('\u8BF7\u62D6\u5165 .json \u6587\u4EF6');
+    }
+  });
+}
+
+// ── Debounced search ── [#5]
+let _searchTimer = null;
+function debouncedSearch() {
+  clearTimeout(_searchTimer);
+  _searchTimer = setTimeout(renderList, 200);
+}
+
+// ── Event Listeners ──
+document.getElementById('searchInput').addEventListener('input', debouncedSearch);
+
+// [#8] oninput/onpaste for body textarea via addEventListener
+document.getElementById('formBody').addEventListener('input', () => { autoName(); updateBodyCounter(); });
+document.getElementById('formBody').addEventListener('paste', () => setTimeout(() => { autoName(); updateBodyCounter(); }, 0));
+
+// Tag input Enter
+document.getElementById('tagInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); addTag(); }
+  if (e.key === 'Escape') { closeDropdown('tagDropdown'); }
+});
+document.getElementById('tagInput').addEventListener('input', onTagInput);
+
+// Tool input Enter
+document.getElementById('toolInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); addTool(); }
+  if (e.key === 'Escape') { closeDropdown('toolDropdown'); }
+});
+document.getElementById('toolInput').addEventListener('input', onToolInput);
+
+// Tool add button
+document.getElementById('toolAddBtn').addEventListener('click', () => addTool());
+
+// Tool chips quick-select (event delegation)
+document.getElementById('toolChipsRow').addEventListener('click', e => {
+  const chip = e.target.closest('[data-tool]');
+  if (chip) toggleTool(chip.dataset.tool);
+});
+
+// Tag suggest row quick-select (event delegation)
+document.getElementById('tagSuggestRow').addEventListener('click', e => {
+  const chip = e.target.closest('[data-suggest-tag]');
+  if (chip) toggleSuggestTag(chip.dataset.suggestTag);
+});
+
+// Autocomplete dropdown clicks (event delegation)
+document.getElementById('tagDropdown').addEventListener('mousedown', e => {
+  const item = e.target.closest('[data-val]');
+  if (item) { e.preventDefault(); addTagByName(item.dataset.val); }
+});
+document.getElementById('toolDropdown').addEventListener('mousedown', e => {
+  const item = e.target.closest('[data-val]');
+  if (item) { e.preventDefault(); addTool(item.dataset.val); }
+});
+
+// Close dropdowns on outside click
+document.addEventListener('click', e => {
+  if (!e.target.closest('#tagInput') && !e.target.closest('#tagDropdown')) closeDropdown('tagDropdown');
+  if (!e.target.closest('#toolInput') && !e.target.closest('#toolDropdown')) closeDropdown('toolDropdown');
+});
+
+// Event delegation: tag filter
+document.getElementById('tagFilter').addEventListener('click', handleTagFilterClick);
+
+// Event delegation: card grid
+document.getElementById('cardGrid').addEventListener('click', handleCardGridClick);
+
+// Event delegation: form tag chips (remove button)
+document.getElementById('tagWrap').addEventListener('click', e => {
+  const removeBtn = e.target.closest('[data-idx]');
+  if (removeBtn) {
+    removeFormTag(parseInt(removeBtn.dataset.idx, 10));
+  }
+});
+
+// Event delegation: form tool chips (remove button)
+document.getElementById('toolWrap').addEventListener('click', e => {
+  const removeBtn = e.target.closest('[data-idx]');
+  if (removeBtn) {
+    removeFormTool(parseInt(removeBtn.dataset.idx, 10));
+  }
+});
+
+// Control buttons (migrated from inline onclick handlers)
+document.getElementById('importBtn').addEventListener('click', importJSON);
+document.getElementById('exportBtn').addEventListener('click', exportJSON);
+document.getElementById('newBtn').addEventListener('click', openEditor);
+document.getElementById('editorCloseBtn').addEventListener('click', closeEditor);
+document.getElementById('editorCancelBtn').addEventListener('click', closeEditor);
+document.getElementById('editorSaveBtn').addEventListener('click', savePrompt);
+document.getElementById('tagAddBtn').addEventListener('click', addTag);
+document.getElementById('detailOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('detailOverlay')) closeDetail();
+});
+document.getElementById('detailCloseBtn').addEventListener('click', closeDetail);
+document.getElementById('copyBtn').addEventListener('click', copyPrompt);
+document.getElementById('editBtn').addEventListener('click', editCurrent);
+document.getElementById('deleteBtn').addEventListener('click', deleteCurrent);
+document.getElementById('fileInput').addEventListener('change', e => handleImport(e));
+
+// ── Init ──
+renderList();
+setupDragDrop();
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); document.getElementById('searchInput').focus(); }
+  if (e.key === 'Escape') { closeEditor(); closeDetail(); }
+});
+</script>
+
+<!-- Footer -->
+<footer class="app-footer">
+  v1.3.0 20260808 · <a href="https://github.com/YesonWyld/prompt-vault" target="_blank" rel="noopener">YesonWyld</a>
+</footer>
+
+</body>
+</html>
