@@ -1,5 +1,7 @@
 # PromptVault · 提示词宝库
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 一个**零依赖、单文件**的 AI 提示词管理工具。在浏览器中直接运行，所有数据存储在 localStorage 中，无需服务器、无需安装。
 
 ## ✨ 功能特性
@@ -15,15 +17,21 @@
 - **📊 字数统计** — 正文区域实时显示字数和行数
 - **🔒 数据本地化** — 全部数据存储在浏览器 localStorage 中，无隐私泄露风险
 
+## 📸 界面预览
+
+![PromptVault 界面截图](assets/screenshot.png)
+
 ## 🚀 快速开始
 
-1. 下载 `prompt-manager.html`
+> 💻 **在线体验**（GitHub Pages）：部署后访问 `https://<你的 GitHub 用户名>.github.io/prompt-vault/`
+
+1. 下载 `prompt-vault.html`
 2. 用浏览器打开即可使用
 3. （可选）部署到任意静态文件服务器
 
 ```bash
 # 本地预览
-open prompt-manager.html
+open prompt-vault.html
 
 # 或用 Python 起一个本地服务器
 python -m http.server 8080
@@ -67,14 +75,16 @@ python -m http.server 8080
 
 ```
 prompt-vault/
-├── prompt-manager.html      # 主应用文件（~1200 行）
-├── review-prompt-manager.md # 代码审查报告
-├── bakup/                   # 历史版本备份
-│   ├── prompt-manager-workbuddy.html
-│   ├── prompt-manager-codex.html
-│   └── prompt-manager-trdd.html
+├── prompt-vault.html           # 主应用文件（~1300 行）
+├── assets/
+│   ├── favicon.ico             # 站点图标
+│   ├── favicon.png
+│   └── screenshot.png          # README 预览截图
+├── .github/workflows/pages.yml # GitHub Pages 自动部署
 ├── README.md
-└── CHANGELOG.md
+├── CHANGELOG.md
+├── LICENSE
+└── .gitignore
 ```
 
 ## ⚠️ 注意事项
@@ -85,4 +95,4 @@ prompt-vault/
 
 ## 📄 许可证
 
-MIT License
+[MIT](LICENSE) © 2026 YesonWyld

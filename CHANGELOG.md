@@ -6,6 +6,21 @@
 
 ---
 
+## [Unreleased]
+
+### 新增
+
+- MIT 许可证（`LICENSE`），作者 YesonWyld
+- 站点图标（favicon.ico / favicon.png）
+- GitHub Pages 自动部署工作流（`.github/workflows/pages.yml`）
+
+### 变更
+
+- 主应用文件由 `prompt-manager.html` 重命名为 `prompt-vault.html`
+- 静态资源整理至 `assets/` 目录
+- 补齐剩余按钮的内联 `onclick`/`onchange` 迁移，全部事件统一使用 `addEventListener`（完成 1.2.0 声明的事件迁移）
+- README 项目结构与实际文件保持一致
+
 ## [1.2.0] - 2026-06-25
 
 ### 新增

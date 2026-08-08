@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PromptVault · 提示词宝库</title>
+<link rel="icon" type="image/png" sizes="512x512" href="assets/favicon.png">
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
 <style>
   :root {
     --bg: #F5F5F7;
@@ -458,9 +460,9 @@
       <input type="text" id="searchInput" placeholder="搜索提示词… (Ctrl+K)">
     </div>
     <div class="header-actions">
-      <button class="btn btn-outline btn-sm" onclick="importJSON()">&#128229; 导入</button>
-      <button class="btn btn-outline btn-sm" onclick="exportJSON()">&#128228; 导出</button>
-      <button class="btn btn-primary btn-sm" onclick="openEditor()">&#43; 新建</button>
+      <button class="btn btn-outline btn-sm" id="importBtn">&#128229; 导入</button>
+      <button class="btn btn-outline btn-sm" id="exportBtn">&#128228; 导出</button>
+      <button class="btn btn-primary btn-sm" id="newBtn">&#43; 新建</button>
     </div>
   </div>
 </header>
@@ -479,7 +481,7 @@
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title" id="editorTitle">新建提示词</div>
-      <button class="btn-icon" onclick="closeEditor()">&#10005;</button>
+      <button class="btn-icon" id="editorCloseBtn">&#10005;</button>
     </div>
     <div class="modal-body">
       <div class="form-group">
@@ -512,7 +514,7 @@
             <input class="form-input" id="tagInput" placeholder="输入标签名，按 Enter 或点击添加…" autocomplete="off">
             <div class="autocomplete-dropdown" id="tagDropdown"></div>
           </div>
-          <button class="tag-add-btn" onclick="addTag()">+ 添加</button>
+          <button class="tag-add-btn" id="tagAddBtn">+ 添加</button>
         </div>
       </div>
       <div class="form-group">
@@ -526,18 +528,18 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeEditor()">取消</button>
-      <button class="btn btn-primary" onclick="savePrompt()">保存</button>
+      <button class="btn btn-outline" id="editorCancelBtn">取消</button>
+      <button class="btn btn-primary" id="editorSaveBtn">保存</button>
     </div>
   </div>
 </div>
 
 <!-- Detail Panel -->
-<div class="detail-overlay" id="detailOverlay" onclick="if(event.target===this)closeDetail()">
+<div class="detail-overlay" id="detailOverlay">
   <div class="detail-panel" id="detailPanel">
     <div class="detail-header">
       <div class="modal-title" id="detailName"></div>
-      <button class="btn-icon" onclick="closeDetail()">&#10005;</button>
+      <button class="btn-icon" id="detailCloseBtn">&#10005;</button>
     </div>
     <div class="detail-body">
       <div class="detail-meta" id="detailMeta"></div>
@@ -545,9 +547,9 @@
       <div id="detailNote" style="margin-top:16px;font-size:13px;color:var(--text-sec);line-height:1.7;white-space:pre-wrap;"></div>
     </div>
     <div class="detail-actions">
-      <button class="btn btn-outline btn-sm" onclick="copyPrompt()">&#128203; 复制提示词</button>
-      <button class="btn btn-outline btn-sm" onclick="editCurrent()">&#9998; 编辑</button>
-      <button class="btn btn-danger btn-sm" onclick="deleteCurrent()">&#128465; 删除</button>
+      <button class="btn btn-outline btn-sm" id="copyBtn">&#128203; 复制提示词</button>
+      <button class="btn btn-outline btn-sm" id="editBtn">&#9998; 编辑</button>
+      <button class="btn btn-danger btn-sm" id="deleteBtn">&#128465; 删除</button>
     </div>
   </div>
 </div>
@@ -556,7 +558,7 @@
 <div class="toast" id="toast"></div>
 
 <!-- Hidden file input -->
-<input type="file" id="fileInput" accept=".json" style="display:none" onchange="handleImport(event)">
+<input type="file" id="fileInput" accept=".json" style="display:none">
 
 <script>
 // ── Data Layer ──
@@ -1262,6 +1264,23 @@ document.getElementById('toolWrap').addEventListener('click', e => {
     removeFormTool(parseInt(removeBtn.dataset.idx, 10));
   }
 });
+
+// Control buttons (migrated from inline onclick handlers)
+document.getElementById('importBtn').addEventListener('click', importJSON);
+document.getElementById('exportBtn').addEventListener('click', exportJSON);
+document.getElementById('newBtn').addEventListener('click', openEditor);
+document.getElementById('editorCloseBtn').addEventListener('click', closeEditor);
+document.getElementById('editorCancelBtn').addEventListener('click', closeEditor);
+document.getElementById('editorSaveBtn').addEventListener('click', savePrompt);
+document.getElementById('tagAddBtn').addEventListener('click', addTag);
+document.getElementById('detailOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('detailOverlay')) closeDetail();
+});
+document.getElementById('detailCloseBtn').addEventListener('click', closeDetail);
+document.getElementById('copyBtn').addEventListener('click', copyPrompt);
+document.getElementById('editBtn').addEventListener('click', editCurrent);
+document.getElementById('deleteBtn').addEventListener('click', deleteCurrent);
+document.getElementById('fileInput').addEventListener('change', e => handleImport(e));
 
 // ── Init ──
 renderList();

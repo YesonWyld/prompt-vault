@@ -1,0 +1,16 @@
+# Normalize line endings
+* text=auto
+
+# Explicit LF for source/docs
+*.html text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Binary assets
+*.ico binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
