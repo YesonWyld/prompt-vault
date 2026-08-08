@@ -4,19 +4,15 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
----
-
-## [Unreleased]
-
-### 修复
-
-- 根路径新增 `index.html` 入口页，修复 GitHub Pages 首页误显示 README 的问题
-
 ## [1.4.0] - 2026-08-08
 
 ### 新增
 
 - 应用英文版（`prompt-vault.en.html`）与英文说明文档（`README.en.md`）
+
+### 修复
+
+- 根路径新增 `index.html` 入口页，修复 GitHub Pages 首页误显示 README 的问题
 
 ## [1.3.0] - 2026-08-08
 
